@@ -28,22 +28,20 @@ function createToy(toy){
   
   let toyName = document.createElement('h2');
   toyName.innerText = toy.name;
-  toyCard.appendChild(toyName);
   
   let img = document.createElement('img');
   img.src = toy.image;
   img.setAttribute('class', 'toy-avatar');
-  toyCard.appendChild(img);
 
   let p = document.createElement('p');
   p.textContent = `${toy.likes} Likes`
-  toyCard.appendChild(p);
   
   let btn = document.createElement('button');
   btn.setAttribute('class', 'like-btn');
+  btn.setAttribute('id', toy.id)
   btn.addEventListener('click', handleLikeToy);
   btn.innerText = 'Like';
-  toyCard.appendChild(btn);
+  toyCard.append(toyName, img, p, btn)
 }
 
 function handleNewToy() {
@@ -52,6 +50,7 @@ function handleNewToy() {
 }
 
 function handleSubmit(e){
+  e.preventDefault();
   let newToy = {
     name: e.target["name"].value,
     image: e.target["image"].value,
@@ -74,16 +73,21 @@ function postToy(toy){
 }
 
 function handleLikeToy(e){
-  let selectedToy = e.target.parentNode.childNodes[0];
-  selectedToy.likes++;
-  
+  e.preventDefault();
+  let likesCount = parseInt(e.target.previousElementSibling.innerText.charAt(0)) + 1;
+  fetch(`http://localhost:3000/toys/${e.target.id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      likes: likesCount
+    })
+  }).then(res => res.json())
+  .then(json => {
+    e.target.previousElementSibling.innerText = `${likesCount} Likes`
+  })
 }
-
-
-
-
-
-
 
 fetchToys();
 handleNewToy();
